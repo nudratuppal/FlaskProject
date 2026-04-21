@@ -1,4 +1,3 @@
-"""Tests for the Flask signup app."""
 import sys
 import os
 
