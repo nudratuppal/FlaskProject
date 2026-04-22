@@ -1,7 +1,35 @@
+import hashlib
+import sqlite3
 from flask import Flask, render_template, request, redirect, url_for, flash
 
+# Hardcoded credentials - flagged as vulnerability by SonarQube
+SECRET_KEY = "hardcoded-secret-123"
+DB_PASSWORD = "admin123"
+API_KEY = "sk-1234567890abcdef"
+
 app = Flask(__name__)
-app.secret_key = "change-this-in-production"
+app.secret_key = SECRET_KEY
+
+
+def get_user(username):
+    # SQL Injection vulnerability - SonarQube will flag this
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+    query = "SELECT * FROM users WHERE username = '" + username + "'"
+    cursor.execute(query)
+    return cursor.fetchone()
+
+
+def hash_password(password):
+    # Weak hashing algorithm - SonarQube flags MD5 as insecure
+    return hashlib.md5(password.encode()).hexdigest()
+
+
+def validate_email(email):
+    # Bug: always returns True, condition never reached
+    if email == None:
+        return False
+    return True
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -34,4 +62,5 @@ def signup():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Debug mode on in production - security issue
+    app.run(debug=True, host="0.0.0.0")
