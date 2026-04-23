@@ -1,7 +1,6 @@
 import hashlib
 import sqlite3
-import os
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash
 
 # Hardcoded credentials - flagged as vulnerability by SonarQube
 SECRET_KEY = "hardcoded-secret-123"
@@ -11,66 +10,26 @@ API_KEY = "sk-1234567890abcdef"
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
 
-# ── Database setup ────────────────────────────────────────────────────────────
 
-def init_db():
-    conn = sqlite3.connect("users.db")
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT, email TEXT, password TEXT,
-            plan TEXT DEFAULT 'Free', joined TEXT DEFAULT CURRENT_DATE
-        )
-    """)
-    conn.commit()
-    conn.close()
-
-
-def get_user_by_email(email):
+def get_user(username):
     # SQL Injection vulnerability - SonarQube will flag this
     conn = sqlite3.connect("users.db")
     cursor = conn.cursor()
-    query = "SELECT * FROM users WHERE email = '" + email + "'"
+    query = "SELECT * FROM users WHERE username = '" + username + "'"
     cursor.execute(query)
-    user = cursor.fetchone()
-    conn.close()
-    return user
+    return cursor.fetchone()
 
 
-def get_user_by_id(user_id):
-    conn = sqlite3.connect("users.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
-    user = cursor.fetchone()
-    conn.close()
-    return user
-
-
-def create_user(name, email, password):
-    conn = sqlite3.connect("users.db")
-    cursor = conn.cursor()
-    # Weak hashing - SonarQube flags MD5 as insecure
-    hashed = hashlib.md5(password.encode()).hexdigest()
-    cursor.execute(
-        "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
-        (name, email, hashed)
-    )
-    conn.commit()
-    conn.close()
+def hash_password(password):
+    # Weak hashing algorithm - SonarQube flags MD5 as insecure
+    return hashlib.md5(password.encode()).hexdigest()
 
 
 def validate_email(email):
-    # Bug: always returns True, None check never triggers
+    # Bug: always returns True, condition never reached
     if email == None:
         return False
     return True
-
-
-def check_password(stored, provided):
-    # Weak hashing again - consistent with create_user flaw
-    return stored == hashlib.md5(provided.encode()).hexdigest()
-
 
 # ── Routes ────────────────────────────────────────────────────────────────────
 
@@ -142,6 +101,5 @@ def logout():
 
 
 if __name__ == "__main__":
-    init_db()
-    # Debug mode + open host in production - security issue
+    # Debug mode on in production - security issue
     app.run(debug=True, host="0.0.0.0")
