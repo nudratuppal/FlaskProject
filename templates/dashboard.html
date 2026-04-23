@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ink: #0e0e0e; --paper: #f5f0e8; --accent: #c84b2f;
+      --muted: #7a7060; --border: #cdc7bb; --card: #fff;
+    }
+    body { min-height: 100vh; background: #f0ebe0; font-family: 'DM Mono', monospace; color: var(--ink); }
+
+    /* ── Sidebar ── */
+    .layout { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+    .sidebar {
+      background: var(--ink); padding: 2rem 1.5rem;
+      display: flex; flex-direction: column; gap: 0.3rem;
+    }
+    .sidebar-brand {
+      font-size: .65rem; letter-spacing: .2em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 2rem;
+    }
+    .nav-item {
+      display: block; padding: .55rem .75rem; font-size: .7rem;
+      letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.5);
+      text-decoration: none; border-radius: 2px; transition: all .2s;
+    }
+    .nav-item:hover, .nav-item.active {
+      background: rgba(255,255,255,.07); color: #fff;
+    }
+    .nav-item.active { color: var(--accent); }
+    .sidebar-footer { margin-top: auto; }
+    .logout-btn {
+      display: block; width: 100%; padding: .6rem; background: transparent;
+      border: 1px solid rgba(255,255,255,.15); color: rgba(255,255,255,.5);
+      font-family: 'DM Mono', monospace; font-size: .62rem; letter-spacing: .15em;
+      text-transform: uppercase; cursor: pointer; text-align: center;
+      text-decoration: none; transition: all .2s;
+    }
+    .logout-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Main ── */
+    .main { padding: 2.5rem 3rem; overflow-y: auto; }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 2.5rem;
+    }
+    .page-title p { font-size: .6rem; letter-spacing: .2em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: .3rem; }
+    .page-title h1 { font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem; font-weight: 300; }
+    .user-chip {
+      font-size: .65rem; letter-spacing: .1em; color: var(--muted);
+      padding: .5rem .9rem; border: 1px solid var(--border); border-radius: 2px;
+    }
+
+    /* ── Stat cards ── */
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-bottom: 2rem; }
+    .stat-card { background: var(--card); padding: 1.4rem 1.6rem; border-top: 3px solid var(--border); }
+    .stat-card.highlight { border-top-color: var(--accent); }
+    .stat-label { font-size: .6rem; letter-spacing: .15em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: .6rem; }
+    .stat-value { font-family: 'Cormorant Garamond', serif;
+      font-size: 2.4rem; font-weight: 300; line-height: 1; }
+    .stat-sub { font-size: .65rem; color: var(--muted); margin-top: .4rem; }
+
+    /* ── Profile card ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    .card { background: var(--card); padding: 1.6rem; }
+    .card-title { font-size: .62rem; letter-spacing: .18em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 1.2rem;
+      padding-bottom: .7rem; border-bottom: 1px solid var(--border); }
+    .profile-row { display: flex; justify-content: space-between;
+      align-items: center; padding: .6rem 0; border-bottom: 1px solid #f0ebe0; }
+    .profile-row:last-child { border-bottom: none; }
+    .pr-label { font-size: .6rem; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--muted); }
+    .pr-value { font-size: .8rem; color: var(--ink); }
+
+    /* ── Activity ── */
+    .activity-item { display: flex; gap: 1rem; padding: .8rem 0;
+      border-bottom: 1px solid #f0ebe0; align-items: flex-start; }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-dot { width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent); margin-top: 5px; flex-shrink: 0; }
+    .activity-text { font-size: .75rem; color: var(--ink); line-height: 1.5; }
+    .activity-time { font-size: .6rem; color: var(--muted); margin-top: .2rem; }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .main { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <p class="sidebar-brand">Apex Studio</p>
+    <a href="/dashboard" class="nav-item active">Overview</a>
+    <a href="#" class="nav-item">Projects</a>
+    <a href="#" class="nav-item">Analytics</a>
+    <a href="#" class="nav-item">Billing</a>
+    <a href="#" class="nav-item">Settings</a>
+    <div class="sidebar-footer">
+      <a href="/logout" class="logout-btn">Sign out</a>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main">
+    <div class="topbar">
+      <div class="page-title">
+        <p>Welcome back</p>
+        <h1>{{ user[1] if user else "Guest" }}</h1>
+      </div>
+      <div class="user-chip">{{ user[2] if user else "Not logged in" }}</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-card highlight">
+        <p class="stat-label">Current Plan</p>
+        <p class="stat-value">{{ user[4] if user else "—" }}</p>
+        <p class="stat-sub">Active subscription</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Projects</p>
+        <p class="stat-value">3</p>
+        <p class="stat-sub">2 active · 1 archived</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Member Since</p>
+        <p class="stat-value" style="font-size:1.4rem">{{ user[5] if user else "—" }}</p>
+        <p class="stat-sub">Account age</p>
+      </div>
+    </div>
+
+    <!-- Profile + Activity -->
+    <div class="grid-2">
+      <div class="card">
+        <p class="card-title">Account Details</p>
+        <div class="profile-row">
+          <span class="pr-label">Full Name</span>
+          <span class="pr-value">{{ user[1] if user else "—" }}</span>
+        </div>
+        <div class="profile-row">
+          <span class="pr-label">Email</span>
+          <span class="pr-value">{{ user[2] if user else "—" }}</span>
+        </div>
+        <div class="profile-row">
+          <span class="pr-label">Plan</span>
+          <span class="pr-value">{{ user[4] if user else "—" }}</span>
+        </div>
+        <div class="profile-row">
+          <span class="pr-label">Joined</span>
+          <span class="pr-value">{{ user[5] if user else "—" }}</span>
+        </div>
+        <!-- Exposing hashed password - bad practice flagged by SonarQube -->
+        <div class="profile-row">
+          <span class="pr-label">Password Hash</span>
+          <span class="pr-value" style="font-size:.6rem;color:#aaa">{{ user[3] if user else "—" }}</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">Recent Activity</p>
+        <div class="activity-item">
+          <div class="activity-dot"></div>
+          <div>
+            <p class="activity-text">Signed in from new device</p>
+            <p class="activity-time">Just now</p>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot" style="background:#7a7060"></div>
+          <div>
+            <p class="activity-text">Project "Alpha" updated</p>
+            <p class="activity-time">2 hours ago</p>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot" style="background:#7a7060"></div>
+          <div>
+            <p class="activity-text">Account created successfully</p>
+            <p class="activity-time">{{ user[5] if user else "—" }}</p>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot" style="background:#7a7060"></div>
+          <div>
+            <p class="activity-text">Billing plan set to Free</p>
+            <p class="activity-time">{{ user[5] if user else "—" }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>
