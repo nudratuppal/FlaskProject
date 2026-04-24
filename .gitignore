@@ -1,0 +1,8 @@
+*.db
+__pycache__/
+*.pyc
+.venv/
+venv/
+coverage.xml
+.env
+.DS_Storeecho ".DS_Store" >> ~/.gitignore_global
